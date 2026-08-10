@@ -42,9 +42,40 @@ bool waittime = true;
 bool startedwait = false;
 long elapsedtime;
 int temperature;
-
+uint32_t smoothntc = 0;
 int digitoaentrar = 1;
 
+class MovingAverage {
+  private:
+    int _numReadings;
+    uint32_t *_readings;     
+    int _readIndex = 0;
+    uint32_t _total = 0;   
+
+  public:
+    MovingAverage(int size) {
+      _numReadings = size;
+      _readings = new uint32_t[_numReadings];
+      for (int i = 0; i < _numReadings; i++) _readings[i] = 0.0;
+    }
+
+    ~MovingAverage() {  // free memory
+      delete[] _readings;
+    }
+
+    uint32_t update(uint32_t newValue) {
+      _total -= _readings[_readIndex];
+      _readings[_readIndex] = newValue;
+      _total += newValue;
+
+      _readIndex++;
+      if (_readIndex >= _numReadings) _readIndex = 0;
+
+      return _total / _numReadings; 
+    }
+};
+
+MovingAverage ntcAvg(15);
 
 void setup() {
   
@@ -141,23 +172,23 @@ void loop() {
     double t = beta / log(rt/rx);
     t= t - 273;
     temperature = int(t);
-    //Serial.println (t-273.0);
+    smoothntc = ntcAvg.update(temperature);
 
-    if(temperature < 10){
+    if(smoothntc < 10){
       tens= 0;
-      unit= temperature;
-    }else if(temperature >= 10 && temperature < 20){
+      unit= smoothntc;
+    }else if(smoothntc >= 10 && smoothntc < 20){
        tens= 1;
-       unit= temperature - 10;
-    }else if(temperature >= 20 && temperature < 30){
+       unit= smoothntc - 10;
+    }else if(smoothntc >= 20 && smoothntc < 30){
       tens= 2;
-      unit= temperature - 20;
-    }else if(temperature >= 30 && temperature < 40){
+      unit= smoothntc - 20;
+    }else if(smoothntc >= 30 && smoothntc < 40){
       tens= 3;
-      unit= temperature - 30;
-    }else if(temperature >= 40 && temperature < 50){
+      unit= smoothntc - 30;
+    }else if(smoothntc >= 40 && smoothntc < 50){
       tens= 4;
-      unit= temperature - 40;
+      unit= smoothntc - 40;
     }else{
       tens= 0;
       unit= 0;
