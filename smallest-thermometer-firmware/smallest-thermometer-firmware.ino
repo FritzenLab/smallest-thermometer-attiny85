@@ -164,11 +164,9 @@ void loop() {
       delay (100);
     }
 
-    // Determina a resistência do termistor
     double v = (vcc*soma)/(nAmostras*1024.0);
     double rt = (vcc*R)/v - R;
  
-    // Calcula a temperature
     double t = beta / log(rt/rx);
     t= t - 273;
     temperature = int(t);
