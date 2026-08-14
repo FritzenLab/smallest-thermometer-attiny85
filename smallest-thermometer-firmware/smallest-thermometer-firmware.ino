@@ -110,7 +110,7 @@ void loop() {
       } 
       doubletens --;
       if(doubletens != 0){
-        digitalWrite(pinZero, !digitalRead(0));
+        digitalWrite(pinZero, !digitalRead(pinZero));
       }else{
         blinkingunits = true;
         blinkingtens = false;
@@ -127,7 +127,7 @@ void loop() {
       }
       doubleunit --;
       if(doubleunit != 0){
-        digitalWrite(pinUno, !digitalRead(1));
+        digitalWrite(pinUno, !digitalRead(pinUno));
       }else{
         waittime = true;
         blinkingunits = false;
