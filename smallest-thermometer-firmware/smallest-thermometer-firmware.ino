@@ -42,20 +42,21 @@ bool waittime = true;
 bool startedwait = false;
 long elapsedtime;
 int temperature;
-uint32_t smoothntc = 0;
+float smoothntc = 0;
 int digitoaentrar = 1;
 
 class MovingAverage {
   private:
     int _numReadings;
-    uint32_t *_readings;     
+    float *_readings;     
     int _readIndex = 0;
-    uint32_t _total = 0;   
+    float _total = 0; 
+    int _startupCounter = 0;
 
   public:
     MovingAverage(int size) {
       _numReadings = size;
-      _readings = new uint32_t[_numReadings];
+      _readings = new float[_numReadings];
       for (int i = 0; i < _numReadings; i++) _readings[i] = 0.0;
     }
 
@@ -63,7 +64,8 @@ class MovingAverage {
       delete[] _readings;
     }
 
-    uint32_t update(uint32_t newValue) {
+    float update(float newValue) {
+	    _startupCounter ++;
       _total -= _readings[_readIndex];
       _readings[_readIndex] = newValue;
       _total += newValue;
@@ -71,7 +73,11 @@ class MovingAverage {
       _readIndex++;
       if (_readIndex >= _numReadings) _readIndex = 0;
 
-      return _total / _numReadings; 
+      if(_startupCounter < _numReadings){
+        return _total / _startupCounter;
+      }else{
+        return _total / _numReadings; 
+      }
     }
 };
 
